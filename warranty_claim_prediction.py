@@ -37,7 +37,7 @@ from sklearn.metrics import recall_score
 
 from sklearn.metrics import f1_score
 
-df_ai4i = pd.read_csv("/content/sample_data/ai4i2020.csv")
+df_ai4i = pd.read_csv("/content/sample_data/ai4i 2020 dataset.csv")
 df_ai4i
 
 df_ai4i.info()
@@ -187,7 +187,10 @@ for column in X.select_dtypes(include='object').columns:
 print("Encoding Complete!")
 
 # Train-Test Split
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 scaler = StandardScaler()
 
@@ -234,3 +237,88 @@ test_accuracy = rf_model.score(X_test, y_test)
 
 print("Testing Accuracy:", round(test_accuracy*100,2), "%")
 
+
+
+"""# **Model Evaluation**"""
+
+# Accuracy, Precision, Recall, F1-score, Confusion Matrix, ROC curve, ROC-AUC score
+
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, roc_curve, roc_auc_score
+
+# Accuracy
+train_accuracy = accuracy_score(y_train, rf_model.predict(X_train))
+test_accuracy = accuracy_score(y_test, rf_model.predict(X_test))
+
+print("Training Accuracy:", round(train_accuracy*100,2), "%")
+print("Testing Accuracy:", round(test_accuracy*100,2), "%")
+
+# Precision
+
+train_precision = precision_score(y_train, rf_model.predict(X_train))
+test_precision = precision_score(y_test, rf_model.predict(X_test))
+
+print("Training Precision:", round(train_precision*100,2), "%")
+print("Testing Precision:", round(test_precision*100,2), "%")
+
+# Recall
+
+train_recall = recall_score(y_train, rf_model.predict(X_train))
+test_recall = recall_score(y_test, rf_model.predict(X_test))
+
+print("Training Recall:", round(train_recall*100,2), "%")
+print("Testing Recall:", round(test_recall*100,2), "%")
+
+# F1-score
+
+train_f1 = f1_score(y_train, rf_model.predict(X_train))
+test_f1 = f1_score(y_test, rf_model.predict(X_test))
+
+print("Training F1-score:", round(train_f1*100,2), "%")
+print("Testing F1-score:", round(test_f1*100,2), "%")
+
+# Confusion Matrix
+
+train_cm = confusion_matrix(y_train, rf_model.predict(X_train))
+test_cm = confusion_matrix(y_test, rf_model.predict(X_test))
+
+print("Training Confusion Matrix:\n", train_cm)
+print("\nTesting Confusion Matrix:\n", test_cm)
+
+# ROC Curve
+
+y_prob_train = rf_model.predict_proba(X_train)[:,1]
+
+train_fpr, train_tpr, _ = roc_curve(y_train, y_prob_train)
+test_fpr, test_tpr, _ = roc_curve(y_test, y_prob)
+
+plt.figure(figsize=(8,6))
+
+plt.plot(train_fpr, train_tpr, label='Training ROC Curve')
+plt.plot(test_fpr, test_tpr, label='Testing ROC Curve')
+
+plt.plot([0,1], [0,1], 'k--')
+
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+
+plt.title('ROC Curve')
+
+plt.legend()
+
+# ROC-AUC Score
+
+train_auc = roc_auc_score(y_train, y_prob_train)
+test_auc = roc_auc_score(y_test, y_prob)
+
+print("Training ROC-AUC Score:", round(train_auc*100,2), "%")
+print("Testing ROC-AUC Score:", round(test_auc*100,2), "%")
+
+# Feature Importance
+
+feature_importance = pd.DataFrame({
+    'Feature': X.columns,
+    'Importance': rf_model.feature_importances_
+})
+
+feature_importance = feature_importance.sort_values(by='Importance', ascending=False)
+print(feature_importance)
