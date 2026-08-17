@@ -150,10 +150,6 @@ Warranty-Claim-Prediction/
 
 The dataset is loaded using Pandas.
 
-```python
-df_ai4i = pd.read_csv("ai4i 2020 dataset.csv")
-```
-
 Initial dataset inspection includes:
 
 * Dataset dimensions
@@ -168,16 +164,7 @@ Initial dataset inspection includes:
 
 The project checks for duplicate records and missing values.
 
-```python
-df_ai4i = df_ai4i.drop_duplicates()
-```
-
-Missing values are examined using:
-
-```python
-df_ai4i.isnull().sum()
-```
-
+Missing values are examined.
 This helps ensure that the dataset is suitable for subsequent analysis and modeling.
 
 ---
@@ -207,35 +194,16 @@ Several EDA techniques are performed to understand the dataset.
 
 The notebook also examines the distribution of the target variable:
 
-```python
-df_ai4i['Machine failure'].value_counts(normalize=True) * 100
-```
-
 ---
 
 # 🎯 4. Feature Selection
 
 The target variable is separated from the predictor variables.
-
-```python
-X = df_ai4i.drop('Machine failure', axis=1)
-
-y = df_ai4i['Machine failure']
-```
-
 Where:
-
 * `X` = Independent variables/features
 * `y` = Target variable
 
 Categorical variables are encoded using `LabelEncoder`.
-
-```python
-le = LabelEncoder()
-
-for column in X.select_dtypes(include='object').columns:
-    X[column] = le.fit_transform(X[column])
-```
 
 ---
 
@@ -243,20 +211,10 @@ for column in X.select_dtypes(include='object').columns:
 
 The dataset is divided into training and testing datasets.
 
-```python
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.2,
-    random_state=42
-)
-```
-
 ### Split
 
 * 🏋️ 80% → Training data
 * 🧪 20% → Testing data
-
 A fixed `random_state=42` is used to make the experiment reproducible.
 
 ---
@@ -265,13 +223,6 @@ A fixed `random_state=42` is used to make the experiment reproducible.
 
 StandardScaler is applied to create scaled training and testing datasets.
 
-```python
-scaler = StandardScaler()
-
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
-```
-
 The Random Forest model itself is trained using the original feature values because tree-based models do not require feature scaling.
 
 ---
@@ -279,14 +230,6 @@ The Random Forest model itself is trained using the original feature values beca
 # 🌲 7. Random Forest Model
 
 The primary machine learning algorithm used is **Random Forest Classification**.
-
-```python
-rf_model = RandomForestClassifier(
-    n_estimators=100,
-    max_depth=None,
-    random_state=42
-)
-```
 
 ### Model Configuration
 
@@ -297,11 +240,7 @@ rf_model = RandomForestClassifier(
 | Maximum Depth   |          None |
 | Random State    |            42 |
 
-The model is trained using:
-
-```python
-rf_model.fit(X_train, y_train)
-```
+The model is trained.
 
 ---
 
@@ -309,16 +248,7 @@ rf_model.fit(X_train, y_train)
 
 The trained model generates predictions on unseen test data.
 
-```python
-y_pred = rf_model.predict(X_test)
-```
-
 Prediction probabilities are also generated:
-
-```python
-y_prob = rf_model.predict_proba(X_test)[:, 1]
-```
-
 These probabilities are used for ROC-AUC analysis.
 
 ---
@@ -342,57 +272,26 @@ This is particularly important for failure prediction because the positive class
 ---
 
 ## 🎯 Accuracy
-
 Measures the percentage of total predictions that were correct.
 
-```python
-accuracy_score(y_test, rf_model.predict(X_test))
-```
-
 ---
-
 ## 🎯 Precision
-
 Measures how many observations predicted as failures were actually failures.
 
-```python
-precision_score(y_test, rf_model.predict(X_test))
-```
-
 ---
-
 ## 🔎 Recall
-
 Measures how many actual failures were successfully identified by the model.
-
-```python
-recall_score(y_test, rf_model.predict(X_test))
-```
 
 For a failure/warranty prediction application, **recall is particularly important** because missing an actual failure can potentially result in higher warranty or maintenance costs.
 
 ---
-
 ## ⚖️ F1-Score
-
 The F1-score balances precision and recall.
-
-```python
-f1_score(y_test, rf_model.predict(X_test))
-```
 
 ---
 
 # 🧮 10. Confusion Matrix
-
 The confusion matrix provides a detailed view of correct and incorrect predictions.
-
-```python
-confusion_matrix(
-    y_test,
-    rf_model.predict(X_test)
-)
-```
 
 It helps identify:
 
@@ -404,15 +303,7 @@ It helps identify:
 ---
 
 # 📈 11. ROC Curve & ROC-AUC
-
 The project generates ROC curves for both training and testing data.
-
-```python
-train_auc = roc_auc_score(y_train, y_prob_train)
-
-test_auc = roc_auc_score(y_test, y_prob)
-```
-
 ROC-AUC measures the model's ability to distinguish between failure and non-failure cases.
 
 A higher ROC-AUC generally indicates better classification discrimination.
@@ -420,27 +311,13 @@ A higher ROC-AUC generally indicates better classification discrimination.
 ---
 
 # ⭐ 12. Feature Importance
-
 Random Forest provides feature importance values that help identify which variables contribute most to the model's predictions.
-
-```python
-feature_importance = pd.DataFrame({
-    'Feature': X.columns,
-    'Importance': rf_model.feature_importances_
-})
-
-feature_importance = feature_importance.sort_values(
-    by='Importance',
-    ascending=False
-)
-```
 
 This allows us to answer an important business question:
 
 > **Which operational factors are most strongly associated with predicted failures?**
 
 These insights can potentially support:
-
 * 🔧 Preventive maintenance
 * 🏭 Manufacturing quality improvement
 * 📦 Parts planning
